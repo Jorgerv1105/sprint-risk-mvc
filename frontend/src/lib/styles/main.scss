@@ -1,0 +1,36 @@
+@use './variables.scss';
+@use './layout.scss';
+@use './components.scss';
+
+$primary-color: #2563eb;
+$secondary-color: #1e293b;
+$background-color: #f8fafc;
+$text-color: #334155;
+
+$border-radius: 10px;
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8fafc;
+}
+
+main {
+    padding: 2rem;
+}
+
+
+.dashboard {
+    
+    &__title {
+        font-size: 2rem;
+        color: #1e293b;
+    }
+
+    &__card {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+}
