@@ -29,4 +29,4 @@ Backend:
 - Relaciones entre tablas
 - Dropdowns dinámicos
 - Validación backend
-- Evaluación de capacidad sprint
+- Evaluación de capcidad sprint
