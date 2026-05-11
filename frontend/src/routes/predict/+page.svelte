@@ -1,274 +1,266 @@
 <script>
-    /* cspell:disable */
-    import { onMount } from 'svelte';
-
-    let developers = $state([]);
-    let sprints = $state([]);
-    let developer_id = $state('');
-    let sprint_id = $state('');
-    let estimated_hours = $state('');
-    let message = $state('');
-    let isError = $state(false); // Para cambiar el color del mensaje si hay error
-
-    async function loadDevelopers() {
-        try {
-            const response = await fetch('https://sprint-risk-mvc.onrender.com/developers');
-            developers = await response.json();
-        } catch (error) {
-            console.error("Error cargando desarrolladores", error);
+    let sprint_capacity = $state(80);
+    let results = $state(null);
+    let tasks = $state([
+        {
+            task_type: 'Backend',
+            complexity: 'High',
+            technology: 'Node.js',
+            story_points: 8,
+            estimated_hours: 40
         }
+    ]);
+
+    function addTask() {
+        tasks = [
+            ...tasks,
+            {
+                task_type: '',
+                complexity: '',
+                technology: '',
+                story_points: 0,
+                estimated_hours: 0
+            }
+        ];
     }
 
-    async function loadSprints() {
-        try {
-            const response = await fetch('https://sprint-risk-mvc.onrender.com/sprints');
-            sprints = await response.json();
-        } catch (error) {
-            console.error("Error cargando sprints", error);
-        }
-    }
-
-    async function saveTask(event) {
+    async function predictSprint(event) {
         event.preventDefault();
-        
-        try {
-            const response = await fetch('https://sprint-risk-mvc.onrender.com/tasks', {
+        const response = await fetch(
+            'https://sprint-risk-mvc.onrender.com/predict/sprint',
+            {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    sprint_id,
-                    developer_id,
-                    estimated_hours
+                    sprint_capacity,
+                    tasks
                 })
-            });
-            
-            const data = await response.json();
-            
-            if (!response.ok) {
-                isError = true;
-                message = data.error || 'Error al guardar la tarea';
-            } else {
-                isError = false;
-                message = data.message || 'Tarea guardada exitosamente';
-                // Opcional: Limpiar el formulario después de guardar
-                estimated_hours = ''; 
             }
-        } catch (error) {
-            console.error(error); // Aquí usamos la variable para quitar el error de ESLint
-            isError = true;
-            message = 'Error de conexión con el servidor';
-        }
+        );
+        results = await response.json();
     }
-
-    onMount(() => {
-        loadDevelopers();
-        loadSprints();
-    });
 </script>
 
-<!-- cspell:disable -->
-<main class="tasks">
-    <section class="tasks__container">
+<main class="predict">
+    <section class="predict__container">
         
-        <!-- Navegación entre vistas -->
-        <nav class="tasks__nav">
+        <!-- Navegación para conectar con la vista de Administración -->
+        <nav class="predict__nav" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-            <a href="/predict" class="tasks__nav-link">
-                Ir al Predictor de Sprints &rarr;
+            <a href="/tasks" style="padding: 8px 16px; background-color: #f1f5f9; color: #334155; text-decoration: none; border-radius: 8px; font-weight: bold; border: 1px solid #ccc;">
+                &larr; Ir a Asignar Tareas (Admin)
             </a>
         </nav>
 
-        <h1 class="tasks__title">
-            Administración de Riesgos del Sprint
+        <h1 class="predict__title">
+            Predictor de Riesgo del Sprint
         </h1>
 
-        <form class="tasks__form" onsubmit={saveTask}>
-            <div class="tasks__group">
-                <label for="developer">Desarrollador</label>
-                <select id="developer" bind:value={developer_id} required>
-                    <option value="">Seleccionar Desarrollador</option>
-                    {#each developers as developer (developer.id)}
-                        <option value={developer.id}>
-                            {developer.name}
-                        </option>
-                    {/each}
-                </select>
-            </div>
-
-            <div class="tasks__group">
-                <label for="sprint">Sprint</label>
-                <select id="sprint" bind:value={sprint_id} required>
-                    <option value="">Seleccionar Sprint</option>
-                    {#each sprints as sprint (sprint.id)}
-                        <option value={sprint.id}>
-                            {sprint.name}
-                        </option>
-                    {/each}
-                </select>
-            </div>
-
-            <div class="tasks__group">
-                <label for="hours">Horas Estimadas</label>
+        <form class="predict__form" onsubmit={predictSprint}>
+            <div class="predict__group">
+                <label for="capacity">
+                    Capacidad del Sprint
+                </label>
                 <input
-                    id="hours"
+                    id="capacity"
                     type="number"
-                    bind:value={estimated_hours}
-                    placeholder="Ej. 20"
-                    required
+                    bind:value={sprint_capacity}
                 />
             </div>
 
-            <button type="submit" class="tasks__button">
-                Guardar Tarea
+            <h2 class="predict__subtitle">
+                Tareas
+            </h2>
+
+            {#each tasks as task, index (index)}
+                <article class="predict__task">
+                    <div class="predict__group">
+                        <label for="task_type_{index}">
+                            Tipo de Tarea
+                        </label>
+                        <select
+                            id="task_type_{index}"
+                            bind:value={task.task_type}
+                        >
+                            <option value="">Seleccionar</option>
+                            <option value="Backend">Backend</option>
+                            <option value="Frontend">Frontend</option>
+                        </select>
+                    </div>
+
+                    <div class="predict__group">
+                        <label for="complexity_{index}">
+                            Complejidad
+                        </label>
+                        <select
+                            id="complexity_{index}"
+                            bind:value={task.complexity}
+                        >
+                            <option value="">Seleccionar</option>
+                            <!-- Los values se mantienen en inglés para no romper la lógica del backend -->
+                            <option value="Low">Baja</option>
+                            <option value="Medium">Media</option>
+                            <option value="High">Alta</option>
+                        </select>
+                    </div>
+
+                    <div class="predict__group">
+                        <label for="technology_{index}">
+                            Tecnología
+                        </label>
+                        <input
+                            id="technology_{index}"
+                            type="text"
+                            bind:value={task.technology}
+                        />
+                    </div>
+
+                    <div class="predict__group">
+                        <label for="story_points_{index}">
+                            Puntos de Historia
+                        </label>
+                        <input
+                            id="story_points_{index}"
+                            type="number"
+                            bind:value={task.story_points}
+                        />
+                    </div>
+
+                    <div class="predict__group">
+                        <label for="estimated_hours_{index}">
+                            Horas Estimadas
+                        </label>
+                        <input
+                            id="estimated_hours_{index}"
+                            type="number"
+                            bind:value={task.estimated_hours}
+                        />
+                    </div>
+                </article>
+            {/each}
+
+            <button
+                type="button"
+                class="predict__add"
+                onclick={addTask}
+            >
+                Añadir Tarea
+            </button>
+
+            <button
+                type="submit"
+                class="predict__button"
+            >
+                Predecir Sprint
             </button>
         </form>
 
-        {#if message}
-            <p class="tasks__message {isError ? 'tasks__message--error' : 'tasks__message--success'}">
-                {message}
-            </p>
+        {#if results}
+            <section class="predict__results">
+                <h2>Resultados del Sprint</h2>
+                <p>Capacidad: {results.sprint_capacity}</p>
+                <p>Horas Predichas: {results.total_predicted_hours}</p>
+                <p>Riesgo del Sprint: {results.sprint_risk}</p>
+
+                <h3>Análisis de Tareas</h3>
+                {#each results.results as result, index (index)}
+                    <article class="predict__card">
+                        <p>Predicción: {result.predicted_hours}h</p>
+                        <p>Riesgo: {result.risk}</p>
+                        <p>Tareas Similares: {result.similar_tasks}</p>
+                    </article>
+                {/each}
+            </section>
         {/if}
     </section>
 </main>
 
 <style>
-/* cspell:disable */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-.tasks {
+.predict {
     min-height: 100vh;
-    padding: 40px 20px;
-    background: #f8fafc;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #0f172a;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
-
-.tasks__container {
-    width: 100%;
-    max-width: 600px;
-    background: #ffffff;
     padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    background: #f4f7fb;
+    font-family: Arial;
 }
 
-/* Estilos para la navegación */
-.tasks__nav {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
+.predict__container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
 }
 
-.tasks__nav-link {
-    display: inline-block;
-    padding: 8px 16px;
-    background-color: #f1f5f9;
-    color: #334155;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.tasks__nav-link:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
-    transform: translateY(-1px);
-}
-
-.tasks__title {
+.predict__title {
     font-size: 32px;
-    font-weight: 700;
-    color: #1e293b;
     margin-bottom: 30px;
-    text-align: center;
 }
 
-.tasks__form {
+.predict__subtitle {
+    margin-top: 30px;
+}
+
+.predict__form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
-.tasks__group {
+.predict__task {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.predict__group {
     display: flex;
     flex-direction: column;
 }
 
-.tasks__group label {
+.predict__group label {
     margin-bottom: 8px;
-    font-weight: 500;
-    font-size: 14px;
-    color: #475569;
+    font-weight: bold;
 }
 
-.tasks__group input,
-.tasks__group select {
-    padding: 12px 16px;
+.predict__group input,
+.predict__group select {
+    padding: 10px;
     border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background-color: #ffffff;
-    font-size: 15px;
-    color: #1e293b;
-    transition: all 0.2s ease;
+    border: 1px solid #ccc;
 }
 
-.tasks__group input:focus,
-.tasks__group select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.tasks__button {
-    padding: 14px 24px;
+.predict__button,
+.predict__add {
+    padding: 12px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    font-weight: 600;
+}
+
+.predict__button {
     background: #2563eb;
     color: white;
-    width: 100%;
-    margin-top: 10px;
-    transition: all 0.2s ease;
 }
 
-.tasks__button:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+.predict__add {
+    background: #16a34a;
+    color: white;
 }
 
-.tasks__button:active {
-    transform: translateY(0);
+.predict__results {
+    margin-top: 40px;
 }
 
-/* Estilos de mensajes (Éxito y Error) */
-.tasks__message {
-    margin-top: 24px;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 500;
-    padding: 12px;
-    border-radius: 8px;
-}
-
-.tasks__message--success {
-    color: #059669;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-}
-
-.tasks__message--error {
-    color: #dc2626;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+.predict__card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
 }
 </style>
