@@ -12,7 +12,7 @@
 
     async function loadDevelopers() {
         try {
-            const response = await fetch('http://localhost:3000/developers');
+            const response = await fetch('https://sprint-risk-mvc.onrender.com/developers');
             developers = await response.json();
         } catch (error) {
             console.error("Error cargando desarrolladores", error);
@@ -21,7 +21,7 @@
 
     async function loadSprints() {
         try {
-            const response = await fetch('http://localhost:3000/sprints');
+            const response = await fetch('https://sprint-risk-mvc.onrender.com/sprints');
             sprints = await response.json();
         } catch (error) {
             console.error("Error cargando sprints", error);
@@ -32,7 +32,7 @@
         event.preventDefault();
         
         try {
-            const response = await fetch('http://localhost:3000/tasks', {
+            const response = await fetch('https://sprint-risk-mvc.onrender.com/tasks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

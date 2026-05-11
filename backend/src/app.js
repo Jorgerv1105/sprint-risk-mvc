@@ -1,4 +1,3 @@
-// Asignamos la conexión a una constante 'db' para poder usarla en este archivo
 const db = require('./config/db'); 
 
 const express = require('express');
@@ -13,16 +12,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ==========================================
-// TUS RUTAS EXISTENTES (MVC)
-// ==========================================
 app.use('/tasks', taskRoutes);
 app.use('/predict', predictRoutes);
 app.use('/predict', sprintPredictRoutes);
 
-// ==========================================
-// NUEVAS RUTAS PARA LOS DROPDOWNS DE SVELTE
-// ==========================================
 app.get('/developers', (req, res) => {
     // Hace un SELECT a tu tabla developers
     db.query('SELECT id, name FROM developers', (error, results) => {
@@ -45,9 +38,6 @@ app.get('/sprints', (req, res) => {
     });
 });
 
-// ==========================================
-// RUTA DE PRUEBA Y SERVIDOR
-// ==========================================
 app.get('/', (req, res) => {
     res.json({
         message: 'Backend funcionando'

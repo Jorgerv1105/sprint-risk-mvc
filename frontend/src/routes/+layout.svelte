@@ -1,6 +1,7 @@
 <script>
 
     import '$lib/styles/main.scss';
+    
 
     let { children } = $props();
 
