@@ -45,14 +45,23 @@
 
 <main class="predict">
     <section class="predict__container">
+        
+        <!-- Navegación para conectar con la vista de Administración -->
+        <nav class="predict__nav" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+            <a href="/tasks" style="padding: 8px 16px; background-color: #f1f5f9; color: #334155; text-decoration: none; border-radius: 8px; font-weight: bold; border: 1px solid #ccc;">
+                &larr; Ir a Asignar Tareas (Admin)
+            </a>
+        </nav>
+
         <h1 class="predict__title">
-            Sprint Risk Predictor
+            Predictor de Riesgo del Sprint
         </h1>
 
         <form class="predict__form" onsubmit={predictSprint}>
             <div class="predict__group">
                 <label for="capacity">
-                    Sprint Capacity
+                    Capacidad del Sprint
                 </label>
                 <input
                     id="capacity"
@@ -62,20 +71,20 @@
             </div>
 
             <h2 class="predict__subtitle">
-                Tasks
+                Tareas
             </h2>
 
             {#each tasks as task, index (index)}
                 <article class="predict__task">
                     <div class="predict__group">
                         <label for="task_type_{index}">
-                            Task Type
+                            Tipo de Tarea
                         </label>
                         <select
                             id="task_type_{index}"
                             bind:value={task.task_type}
                         >
-                            <option value="">Select</option>
+                            <option value="">Seleccionar</option>
                             <option value="Backend">Backend</option>
                             <option value="Frontend">Frontend</option>
                         </select>
@@ -83,22 +92,23 @@
 
                     <div class="predict__group">
                         <label for="complexity_{index}">
-                            Complexity
+                            Complejidad
                         </label>
                         <select
                             id="complexity_{index}"
                             bind:value={task.complexity}
                         >
-                            <option value="">Select</option>
-                            <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
-                            <option value="High">High</option>
+                            <option value="">Seleccionar</option>
+                            <!-- Los values se mantienen en inglés para no romper la lógica del backend -->
+                            <option value="Low">Baja</option>
+                            <option value="Medium">Media</option>
+                            <option value="High">Alta</option>
                         </select>
                     </div>
 
                     <div class="predict__group">
                         <label for="technology_{index}">
-                            Technology
+                            Tecnología
                         </label>
                         <input
                             id="technology_{index}"
@@ -109,7 +119,7 @@
 
                     <div class="predict__group">
                         <label for="story_points_{index}">
-                            Story Points
+                            Puntos de Historia
                         </label>
                         <input
                             id="story_points_{index}"
@@ -120,7 +130,7 @@
 
                     <div class="predict__group">
                         <label for="estimated_hours_{index}">
-                            Estimated Hours
+                            Horas Estimadas
                         </label>
                         <input
                             id="estimated_hours_{index}"
@@ -136,30 +146,30 @@
                 class="predict__add"
                 onclick={addTask}
             >
-                Add Task
+                Añadir Tarea
             </button>
 
             <button
                 type="submit"
                 class="predict__button"
             >
-                Predict Sprint
+                Predecir Sprint
             </button>
         </form>
 
         {#if results}
             <section class="predict__results">
-                <h2>Sprint Results</h2>
-                <p>Capacity: {results.sprint_capacity}</p>
-                <p>Predicted Hours: {results.total_predicted_hours}</p>
-                <p>Sprint Risk: {results.sprint_risk}</p>
+                <h2>Resultados del Sprint</h2>
+                <p>Capacidad: {results.sprint_capacity}</p>
+                <p>Horas Predichas: {results.total_predicted_hours}</p>
+                <p>Riesgo del Sprint: {results.sprint_risk}</p>
 
-                <h3>Tasks Analysis</h3>
+                <h3>Análisis de Tareas</h3>
                 {#each results.results as result, index (index)}
                     <article class="predict__card">
-                        <p>Predicted: {result.predicted_hours}h</p>
-                        <p>Risk: {result.risk}</p>
-                        <p>Similar Tasks: {result.similar_tasks}</p>
+                        <p>Predicción: {result.predicted_hours}h</p>
+                        <p>Riesgo: {result.risk}</p>
+                        <p>Tareas Similares: {result.similar_tasks}</p>
                     </article>
                 {/each}
             </section>
